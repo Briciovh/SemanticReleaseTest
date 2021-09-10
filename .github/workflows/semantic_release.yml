@@ -1,0 +1,74 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Semantic Release
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+ set_version:
+    name: Version Determination
+    runs-on: ubuntu-latest
+    outputs:
+      releaseType: ${{ steps.dv.outputs.RELEASE_TYPE }}
+      buildVersion: ${{ steps.dv.outputs.BUILD_VERSION }}
+    steps:
+      - uses: actions/checkout@v2.3.3
+      - name: Setup Node v12
+        uses: actions/setup-node@v2
+        with:
+          node-version: 12
+      - name: Install Semantic Release
+        run: npm install -g semantic-release conventional-changelog-conventionalcommits
+      - name: Configure Semantic Release
+        run: |
+          CONFIG_SEMANTIC_RELEASE=$(cat << JSON
+            {
+              "plugins": [
+                ["@semantic-release/commit-analyzer", {
+                  "preset": "conventionalcommits"
+                }]
+              ],
+              "branches": ["main"]
+            }
+          JSON
+          )
+          echo $CONFIG_SEMANTIC_RELEASE > .releaserc.json
+      - name: Determine Version
+        id: dv
+        run: |
+          SEM_RELEASE="$(semantic-release --dry-run || true)"
+          NEXT_VERSION=$(echo "$SEM_RELEASE" | (grep 'next release version is' || true) | sed -n -e 's/.*next release version is //p')
+          if [ -z "$NEXT_VERSION" ];
+            then
+              PREVIOUS_TAG=$(git describe --tags --abbrev=0 2> /dev/null || echo "v0.0.1")
+              BUILD_VERSION="${PREVIOUS_TAG:1}"
+            else
+              BUILD_VERSION=$NEXT_VERSION
+          fi
+          NEXT_RELEASE_TYPE=$(echo "$SEM_RELEASE" | (grep 'commits complete' || true) | sed 's/.*complete. \(.*\) release/\1/')
+          if [[ "$NEXT_RELEASE_TYPE" == "no" ]]
+            then RELEASE_TYPE=""
+            else RELEASE_TYPE=$NEXT_RELEASE_TYPE
+          fi
+          NEXT_RELEASE_CHANNEL=$(echo "$SEM_RELEASE" | (grep 'Published release' || true) | sed 's/.*on \(.*\) channel/\1/')
+          if [[ -z "$NEXT_RELEASE_CHANNEL" ]];
+            then RELEASE_CHANNEL="";
+            else RELEASE_CHANNEL=$NEXT_RELEASE_CHANNEL;
+          fi
+          echo "Release Type: $RELEASE_TYPE"
+          echo "Release Channel: $RELEASE_CHANNEL"
+          echo "Build Version $BUILD_VERSION"
+          echo "::set-output name=RELEASE_TYPE::$RELEASE_TYPE"
+          echo "::set-output name=RELEASE_CHANNEL::$RELEASE_CHANNEL"
+          echo "::set-output name=BUILD_VERSION::$BUILD_VERSION"
