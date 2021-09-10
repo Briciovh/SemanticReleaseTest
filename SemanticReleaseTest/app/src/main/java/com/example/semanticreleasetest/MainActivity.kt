@@ -10,10 +10,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
     }
 
-    fun fix1(){
-        return
-    }
-
     fun feat1(){
         Log.i("MyTag", "This is a big feature")
     }
