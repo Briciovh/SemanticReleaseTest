@@ -8,11 +8,15 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        feat2()
+        feat()
+        fix()
     }
 
-    fun feat2(){
+    fun feat(){
         println("Nice feature")
         println("One more change")
+    }
+    fun fix(){
+        println("And a fix")
     }
 }
