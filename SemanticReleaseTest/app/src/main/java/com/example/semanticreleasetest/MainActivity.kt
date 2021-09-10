@@ -10,6 +10,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun fix1(){
-        return 
+        return
     }
 }
