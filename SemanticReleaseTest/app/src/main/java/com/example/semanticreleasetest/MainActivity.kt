@@ -9,8 +9,4 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
     }
-
-    fun feat1(){
-        Log.i("MyTag", "This is a big feature")
-    }
 }
