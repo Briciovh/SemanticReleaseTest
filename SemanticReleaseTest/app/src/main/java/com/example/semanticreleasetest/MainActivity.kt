@@ -2,6 +2,7 @@ package com.example.semanticreleasetest
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -11,5 +12,9 @@ class MainActivity : AppCompatActivity() {
 
     fun fix1(){
         return
+    }
+
+    fun feat1(){
+        Log.i("MyTag", "This is a big feature")
     }
 }
